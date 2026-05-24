@@ -19,7 +19,6 @@ import (
 	"github.com/nicoxiang/geektime-downloader/internal/pkg/logger"
 	"github.com/nicoxiang/geektime-downloader/internal/ui"
 	"github.com/spf13/cobra"
-	"golang.org/x/net/html"
 	"gopkg.in/yaml.v3"
 )
 
@@ -37,7 +36,7 @@ var (
 	listCourses    bool
 )
 
-// 配置文件相关数据结构
+// CourseConfig represents a course in the YAML batch download config
 type CourseConfig struct {
 	ID          int    `yaml:"id"`
 	Type        string `yaml:"type"`
@@ -232,7 +231,6 @@ func runBatchDownloadFromConfig(ctx context.Context, configPath string) error {
 	fmt.Printf("从配置文件中读取到 %d 个课程配置...\n", len(allCourses))
 
 	concurrency := int(math.Ceil(float64(runtime.NumCPU()) / 2.0))
-	downloader := course.NewCourseDownloader(ctx, &cfg, geektimeClient, nil)
 
 	for i, courseConfig := range allCourses {
 		fmt.Printf("\n[%d/%d] 正在处理课程: ID=%d, Type=%s\n",
@@ -248,7 +246,7 @@ func runBatchDownloadFromConfig(ctx context.Context, configPath string) error {
 		applyConfigForCourse(&cfg, batchConfig.Global, courseConfig, concurrency)
 
 		// 重新创建 downloader 以使用新配置
-		downloader = course.NewCourseDownloader(ctx, &cfg, geektimeClient, nil)
+		downloader := course.NewCourseDownloader(ctx, &cfg, geektimeClient, nil)
 
 		if err := downloadCourseByConfig(ctx, courseConfig, productTypeOption, downloader, concurrency); err != nil {
 			fmt.Printf("课程 %d 下载失败: %v\n", courseConfig.ID, err)
@@ -591,43 +589,6 @@ func sortMyProductsByID(products []geektime.MyProduct) {
 			}
 		}
 	}
-}
-
-// Sometime video exist in article content, see issue #104
-// <p>
-// <video poster="https://static001.geekbang.org/resource/image/6a/f7/6ada085b44eddf37506b25ad188541f7.jpg" preload="none" controls="">
-// <source src="https://media001.geekbang.org/customerTrans/fe4a99b62946f2c31c2095c167b26f9c/30d99c0d-16d14089303-0000-0000-01d-dbacd.mp4" type="video/mp4">
-// <source src="https://media001.geekbang.org/2ce11b32e3e740ff9580185d8c972303/a01ad13390fe4afe8856df5fb5d284a2-f2f547049c69fa0d4502ab36d42ea2fa-sd.m3u8" type="application/x-mpegURL">
-// <source src="https://media001.geekbang.org/2ce11b32e3e740ff9580185d8c972303/a01ad13390fe4afe8856df5fb5d284a2-2528b0077e78173fd8892de4d7b8c96d-hd.m3u8" type="application/x-mpegURL"></video>
-// </p>
-func getVideoURLFromArticleContent(content string) (hasVideo bool, videoURL string) {
-	if !strings.Contains(content, "<video") || !strings.Contains(content, "<source") {
-		return false, ""
-	}
-	doc, err := html.Parse(strings.NewReader(content))
-	if err != nil {
-		return false, ""
-	}
-	hasVideo, videoURL = false, ""
-	var f func(*html.Node)
-	f = func(n *html.Node) {
-		if n.Type == html.ElementNode && n.Data == "video" {
-			hasVideo = true
-		}
-		if n.Type == html.ElementNode && n.Data == "source" {
-			for _, a := range n.Attr {
-				if a.Key == "src" && hasVideo && strings.HasSuffix(a.Val, ".mp4") {
-					videoURL = a.Val
-					break
-				}
-			}
-		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			f(c)
-		}
-	}
-	f(doc)
-	return hasVideo, videoURL
 }
 
 // Execute ...
