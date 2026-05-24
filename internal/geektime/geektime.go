@@ -23,6 +23,8 @@ const (
 	V3ArticleInfoPath = "/serv/v3/article/info"
 	// V3VideoPlayAuthPath used in normal video, daily lesson, qconplus video play auth
 	V3VideoPlayAuthPath = "/serv/v3/source_auth/video_play_auth"
+	// V4PvipProductListPath used to get user's subscription product list
+	V4PvipProductListPath = "/serv/v4/pvip/product_list"
 
 	// GeekBangCookieDomain ...
 	GeekBangCookieDomain = ".geekbang.org"

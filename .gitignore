@@ -19,3 +19,24 @@
 dist/
 
 .idea
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Compiled binary
+geektime-downloader
+
+# Config files with real credentials (use courses-example.yaml as template)
+courses.yaml
+test-config.yaml
+
+# Temporary/helper scripts
+check_groups.py
+find_api.py
+parse_courses.py
+parse_user_data.py
+
+# User data files
+*.pyc
+__pycache__/

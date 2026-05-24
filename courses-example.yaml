@@ -1,0 +1,89 @@
+# 极客时间批量下载完整配置文件示例
+# 支持所有配置项的文件配置
+
+# 全局配置
+global:
+  # 认证信息
+  gcid: "your_gcid"                    # 极客时间 cookie 值 gcid
+  gcess: "your_gcess"                  # 极客时间 cookie 值 gcess
+  
+  # 下载配置
+  folder: "/Users/wpy/geektime-downloader"  # 下载目标位置
+  quality: "hd"                        # 视频清晰度: ld(标清), sd(高清), hd(超清)
+  output: 7                            # 输出格式: 1(PDF), 2(Markdown), 4(音频), 可组合(1+2+4=7表示全部)
+  
+  # 下载行为
+  comments: true                       # 是否下载专栏评论
+  interval: 2                          # 下载间隔时间(秒)
+  concurrency: 4                       # 并发下载数(默认为CPU核心数的一半)
+  
+  # PDF生成配置
+  print_pdf_wait: 10                   # Chrome生成PDF前等待时间(秒)
+  print_pdf_timeout: 90                # Chrome生成PDF超时时间(秒)
+  
+  # 企业版设置
+  enterprise: false                    # 是否为企业版极客时间
+
+# 课程配置列表
+courses:
+  # 普通专栏课程 - 下载全部内容
+  - id: 100056701
+    type: normal
+    download_all: true
+    # 可选：覆盖全局配置
+    quality: "sd"                      # 为这个课程单独设置视频质量
+    output: 3                          # 只下载PDF+Markdown
+
+  # 普通专栏课程 - 下载指定文章
+  - id: 100056702
+    type: normal
+    download_all: false
+    article_ids: [1, 2, 3, 5, 8]
+    # 可选：单独配置
+    comments: false                    # 这个课程不下载评论
+    folder: "/custom/path"              # 自定义下载路径
+
+  # 每日一课
+  - id: 100122405
+    type: daily
+    download_all: true
+
+  # 大厂案例
+  - id: 100110494
+    type: qconplus
+    download_all: true
+    quality: "hd"                      # 高清视频
+
+  # 公开课
+  - id: 100546701
+    type: openclass
+    download_all: true
+
+  # 训练营课程
+  - id: 419
+    type: university
+    download_all: true
+    output: 1                          # 只生成PDF
+
+  # 其他类型课程
+  - id: 100551201
+    type: other
+    download_all: true
+
+# 高级配置示例
+advanced_courses:
+  # 企业版训练营
+  - id: 100618109
+    type: university
+    download_all: true
+    enterprise: true                   # 单独标记为企业版
+    
+  # 自定义下载路径和格式的专栏
+  - id: 100056703
+    type: normal
+    download_all: true
+    folder: "/special/location"          # 自定义路径
+    quality: "ld"                      # 标清视频节省空间
+    output: 6                          # 只要Markdown+音频(2+4=6)
+    comments: false                    # 不要评论
+    interval: 3                        # 下载间隔3秒

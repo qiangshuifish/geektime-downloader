@@ -23,14 +23,18 @@ geektime-downloader 支持下载以下极客时间网站资源。
 [![go report card](https://goreportcard.com/badge/github.com/nicoxiang/geektime-downloader "go report card")](https://goreportcard.com/report/github.com/nicoxiang/geektime-downloader)
 [![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 
-## Usage
+## 快速开始
 
-### Prerequisites
+### 环境要求
+- Chrome/Chromium 浏览器（用于PDF生成）
+- Go 1.16+ （源码编译时需要）
 
-- Chrome installed
+### 安装方式
 
-### Install form source
+#### 方式1：下载预编译版本（推荐）
+从 [Releases页面](https://github.com/nicoxiang/geektime-downloader/releases) 下载对应平台的可执行文件。
 
+#### 方式2：从源码安装
 ```bash
 # Go 1.16+
 go install github.com/nicoxiang/geektime-downloader@latest
@@ -39,46 +43,107 @@ go install github.com/nicoxiang/geektime-downloader@latest
 go get -u github.com/nicoxiang/geektime-downloader@latest
 ```
 
-### Download binary files
-
-See [release page](https://github.com/nicoxiang/geektime-downloader/releases)
-
-### Sample
-
+#### 方式3：从源码编译
 ```bash
-## Windows 为例
-## Windows 推荐使用 Windows Terminal 打开
+# 克隆项目
+git clone https://github.com/nicoxiang/geektime-downloader.git
+cd geektime-downloader
 
-## cookie 方式登录
-> geektime-downloader.exe --gcid "gcid" --gcess "gcess"
+# 使用构建脚本（推荐）
+chmod +x build.sh
+./build.sh              # 编译所有平台
+./build.sh -p linux-amd64   # 编译指定平台
+
+# 或手动编译当前平台
+go build -o geektime-downloader
 ```
 
-### Help
+### 基本使用
+
+#### 交互式模式（默认）
+```bash
+# 启动程序，按提示操作
+geektime-downloader
+
+# 或直接提供认证信息
+geektime-downloader --gcid "your_gcid" --gcess "your_gcess"
+```
+
+#### 命令行模式（批量下载）
+```bash
+# 下载单个课程
+geektime-downloader --gcid "xxx" --gcess "yyy" --course-ids 100056701 --product-type normal
+
+# 批量下载多个课程
+geektime-downloader --gcid "xxx" --gcess "yyy" --course-ids 100056701,100056702 --product-type normal
+```
+
+#### 配置文件模式（推荐）
+```bash
+# 创建配置文件
+cp courses-example.yaml my-courses.yaml
+# 编辑配置文件，添加您的课程信息
+
+# 执行下载
+geektime-downloader --config my-courses.yaml
+```
+
+## 命令行参数
 
 ```bash
-## Windows 为例
-
-> geektime-downloader.exe -h
-
-Geektime-downloader is used to download geek time lessons
-
-Usage:
-  geektime-downloader [flags]
+geektime-downloader [flags]
 
 Flags:
+      --article-ids string      指定下载的文章ID，支持逗号分隔，例: 1,2,3
       --comments int            是否下载评论(0不下载,1下载首页评论,2下载所有评论) (default 1)
+      --config string           配置文件路径，支持YAML格式的批量下载配置
+      --course-ids string       课程ID列表，支持逗号分隔，例: 100056701,100056702
+      --download-all            是否下载课程的所有内容 (default true)
       --enterprise              是否下载企业版极客时间资源
-  -f, --folder string           专栏和视频课的下载目标位置 (default "C:\\Users\\nico\\geektime-downloader")
+  -f, --folder string           专栏和视频课的下载目标位置
       --gcess string            极客时间 cookie 值 gcess
       --gcid string             极客时间 cookie 值 gcid
   -h, --help                    help for geektime-downloader
-      --interval int            下载资源的间隔时间, 单位为秒, 默认1秒 (default 1)
+      --interval int            下载资源的间隔时间, 单位为秒 (default 1)
       --log-level string        日志记录级别(debug, info, warn, error, none) (default "info")
+      --non-interactive         非交互模式标志（自动检测）
       --output int              专栏的输出内容(1pdf,2markdown,4audio)可自由组合 (default 1)
-      --print-pdf-timeout int   Chrome生成PDF的超时时间, 单位为秒, 默认60秒 (default 60)
-      --print-pdf-wait int      Chrome生成PDF前的等待页面加载时间, 单位为秒, 默认5秒 (default 5)
+      --print-pdf-timeout int   Chrome生成PDF的超时时间, 单位为秒 (default 60)
+      --print-pdf-wait int      Chrome生成PDF前的等待页面加载时间, 单位为秒 (default 5)
+      --product-type string     产品类型: normal(普通课程), daily(每日一课), openclass(公开课), qconplus(大厂案例), university(训练营), other(其他)
   -q, --quality string          下载视频清晰度(ld标清,sd高清,hd超清) (default "sd")
+
+更多详细使用说明请参考 [使用指南](doc/使用指南.md)。
 ```
+
+## 文档
+
+项目文档已整理到 `doc/` 目录下：
+
+- **[使用指南](doc/使用指南.md)** - 完整的使用说明，包含所有功能和使用模式
+- **[开发者指南](doc/开发者指南.md)** - 项目架构、开发指南和技术实现
+
+### 多平台构建
+
+使用 `build.sh` 脚本可以一键构建多个平台的可执行文件：
+
+```bash
+# 查看帮助
+./build.sh --help
+
+# 构建所有支持的平台
+./build.sh
+
+# 构建特定平台
+./build.sh -p linux-amd64
+./build.sh -p windows-amd64
+./build.sh -p darwin-arm64
+
+# 构建结果在 dist/ 目录
+ls dist/
+```
+
+支持的平台：Windows (amd64/386/arm64), Linux (amd64/386/arm64/arm), macOS (amd64/arm64)
 
 ## Note
 
